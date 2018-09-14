@@ -7,13 +7,11 @@
 
 """
 OID v4 Downloader
-Download specific classes from the huge online dataset Open Image Dataset.
-
-Licensed under the GNU General Public License v3.0 (see LICENSE for details)
+Download specific classes of the huge online dataset Open Image Dataset.
+Licensed under the MIT License (see LICENSE for details)
 ------------------------------------------------------------
+Usage:
 """
-
-
 from sys import exit
 from textwrap import dedent
 from modules.parser import *
@@ -21,6 +19,8 @@ from modules.utils import *
 from modules.downloader import *
 from modules.show import *
 from modules.csv_downloader import *
+
+
 
 ROOT_DIR = ''
 DEFAULT_OID_DIR = os.path.join(ROOT_DIR, 'OID')
@@ -39,7 +39,9 @@ if __name__ == '__main__':
     name_file_class = 'class-descriptions-boxable.csv'
     CLASSES_CSV = os.path.join(csv_dir, name_file_class)
 
-    if args.command == 'download':
+    if args.command == 'downloader':
+	
+        logo(args.command)
 
         if args.type_csv is None:
             print('Missing type_csv argument.')
@@ -53,9 +55,16 @@ if __name__ == '__main__':
         folder = ['train', 'validation', 'test']
         file_list = ['train-annotations-bbox.csv', 'validation-annotations-bbox.csv', 'test-annotations-bbox.csv']
 
+        if args.classes[0].endswith('.txt'):
+                with open(args.classes[0]) as f:
+                    args.classes = f.readlines()
+                args.classes = [x.strip() for x in args.classes]
+        else:
+                args.classes = [arg.replace('_', ' ') for arg in args.classes]
+
         if args.multiclasses == '0':
 
-            mkdirs(dataset_dir, csv_dir, args.classes)
+            mkdirs(dataset_dir, csv_dir, args.classes, args.type_csv)
 
             for classes in args.classes:
 
@@ -70,24 +79,35 @@ if __name__ == '__main__':
                 if args.type_csv == 'train':
                     name_file = file_list[0]
                     df_val = TTV(csv_dir, name_file)
-                    download(args, df_val, folder[0], dataset_dir, class_name, class_code)
+                    if not args.n_threads:
+                        download(args, df_val, folder[0], dataset_dir, class_name, class_code)
+                    else:
+                        download(args, df_val, folder[0], dataset_dir, class_name, class_code, threads = int(args.n_threads))
 
                 elif args.type_csv == 'validation':
                     name_file = file_list[1]
                     df_val = TTV(csv_dir, name_file)
-                    download(args, df_val, folder[1], dataset_dir, class_name, class_code)
+                    if not args.n_threads:
+                        download(args, df_val, folder[1], dataset_dir, class_name, class_code)
+                    else:
+                        download(args, df_val, folder[1], dataset_dir, class_name, class_code, threads = int(args.n_threads))
 
                 elif args.type_csv == 'test':
                     name_file = file_list[2]
                     df_val = TTV(csv_dir, name_file)
-                    download(args, df_val, folder[2], dataset_dir, class_name, class_code)
+                    if not args.n_threads:
+                        download(args, df_val, folder[2], dataset_dir, class_name, class_code)
+                    else:
+                        download(args, df_val, folder[2], dataset_dir, class_name, class_code, threads = int(args.n_threads))
 
                 elif args.type_csv == 'all':
                     for i in range(3):
                         name_file = file_list[i]
                         df_val = TTV(csv_dir, name_file)
-                        download(args, df_val, folder[i], dataset_dir, class_name, class_code)
-
+                        if not args.n_threads:
+                            download(args, df_val, folder[i], dataset_dir, class_name, class_code)
+                        else:
+                            download(args, df_val, folder[i], dataset_dir, class_name, class_code, threads = int(args.n_threads))
                 else:
                     print('[ERROR] csv file not specified')
                     exit(1)
@@ -111,34 +131,60 @@ if __name__ == '__main__':
                 if args.type_csv == 'train':
                     name_file = file_list[0]
                     df_val = TTV(csv_dir, name_file)
-                    download(args, df_val, folder[0], dataset_dir, class_name, class_dict[class_name], class_list)
+                    if not args.n_threads:
+                        download(args, df_val, folder[0], dataset_dir, class_name, class_dict[class_name], class_list)
+                    else:
+                        download(args, df_val, folder[0], dataset_dir, class_name, class_dict[class_name], class_list, int(args.n_threads))
 
                 elif args.type_csv == 'validation':
                     name_file = file_list[1]
                     df_val = TTV(csv_dir, name_file)
-                    download(args, df_val, folder[1], dataset_dir, class_name, class_dict[class_name], class_list)
+                    if not args.n_threads:
+                        download(args, df_val, folder[1], dataset_dir, class_name, class_dict[class_name], class_list)
+                    else:
+                        download(args, df_val, folder[1], dataset_dir, class_name, class_dict[class_name], class_list, int(args.n_threads))
 
                 elif args.type_csv == 'test':
                     name_file = file_list[2]
                     df_val = TTV(csv_dir, name_file)
-                    download(args, df_val, folder[2], dataset_dir, class_name, class_dict[class_name], class_list)
+                    if not args.n_threads:
+                        download(args, df_val, folder[2], dataset_dir, class_name, class_dict[class_name], class_list)
+                    else:
+                        download(args, df_val, folder[2], dataset_dir, class_name, class_dict[class_name], class_list, int(args.n_threads))
 
                 elif args.type_csv == 'all':
                     for i in range(3):
                         name_file = file_list[i]
                         df_val = TTV(csv_dir, name_file)
-                        download(args, df_val, folder[i], dataset_dir, class_name, class_dict[class_name], class_list)
+                        if not args.n_threads:
+                            download(args, df_val, folder[i], dataset_dir, class_name, class_dict[class_name], class_list)
+                        else:
+                            download(args, df_val, folder[i], dataset_dir, class_name, class_dict[class_name], class_list, int(args.n_threads))
 
-    elif args.command == 'visualize':
+
+    elif args.command == 'visualizer':
+
+        logo(args.command)
+
+        flag = 0
 
         while (True):
-
-            print("Which folder do you want to visualize (train, test, validation)? <exit>")
-            image_dir = input("> ")
-            if image_dir == 'exit':
-                exit(1)
-            print("Which class?")
+            if flag == 0:
+                print("Which folder do you want to visualize (train, test, validation)? <exit>")
+                image_dir = input("> ")
+                flag = 1
+                
+                if image_dir == 'exit':
+                    exit(1)
+                    
+            class_image_dir = os.path.join(dataset_dir, image_dir)
+            
+            print("Which class? <exit>")
+            show_classes(os.listdir(class_image_dir))
+            
             class_name = input("> ")
+            if class_name == 'exit':
+                    exit(1)
 
             download_dir = os.path.join(dataset_dir, image_dir, class_name)
             label_dir = os.path.join(dataset_dir, image_dir, class_name, 'Label')
@@ -157,8 +203,10 @@ if __name__ == '__main__':
                 INFO:
                         - Press 'd' to select next image
                         - Press 'a' to select previous image
-                        - Press 'w' to proceed at the previous menu
-                        - You can resize the window if it's not optimal
+                        - Press 'e' to select a new class
+                        - Press 'w' to select a new folder
+                        - Press 'q' to exit
+                  You can resize the window if it's not optimal
                 --------------------------------------------------------
                 """))
 
@@ -180,6 +228,14 @@ if __name__ == '__main__':
                     if index > 0:
                         index -= 1
                     show(class_name, download_dir, label_dir, index)
-                elif k == ord('w'):
+                elif k == ord('e'):
                     cv2.destroyAllWindows()
+                    break
+                elif k == ord('w'):
+                    flag = 0
+                    cv2.destroyAllWindows()
+                    break
+                elif k == ord('q'):
+                    cv2.destroyAllWindows()
+                    exit(1)
                     break
